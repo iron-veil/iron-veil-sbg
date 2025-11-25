@@ -1,3 +1,5 @@
+![Veil — Security Baseline Gate](https://github.com/iron-veil/iron-veil-sbg/actions/workflows/sbg.yml/badge.svg)
+
 # Veil — Security Baseline Gate (SBG)
 
 Veil checks pull requests for baseline GitHub security posture.
