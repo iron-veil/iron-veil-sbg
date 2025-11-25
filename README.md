@@ -11,7 +11,7 @@ jobs:
 
 # Veil — Security Baseline Gate (SBG)
 
-Veil checks pull requests for baseline GitHub security posture.
+Security Baseline Gate — checks for SECURITY.md, Dependabot, Code Scanning default setup visibility, Secret Scanning/Push Protection, Dependency Graph, and SBOM presence.
 
 ## Checks (MVP)
 - Fails if `SECURITY.md` is missing.
