@@ -28,3 +28,5 @@ Veil checks pull requests for baseline GitHub security posture.
 ## Notes
 - Uses the repository `GITHUB_TOKEN` with read-only scopes.
 - No secrets are stored. No outbound calls beyond GitHub’s API.
+
+- Docs: [Partner pitch](docs/PARTNER-PITCH.md) • [Security features](docs/SECURITY_FEATURES.md)
