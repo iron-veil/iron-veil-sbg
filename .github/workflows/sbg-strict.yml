@@ -1,4 +1,5 @@
 name: Veil — Security Baseline Gate (strict)
+
 on:
   pull_request:
   push:
@@ -21,7 +22,6 @@ jobs:
             const { owner, repo } = context.repo;
             const results = [];
             const fail = (m, l) => results.push({ t: 'fail', m, l });
-            const warn = (m, l) => results.push({ t: 'warn', m, l });
             const passm = (m) => results.push({ t: 'pass', m });
 
             let hasSec = false;
@@ -34,12 +34,12 @@ jobs:
             catch { fail('Missing .github/dependabot.yml','https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference'); }
 
             try { await github.rest.codeScanning.listAlertsForRepo({ owner, repo, per_page: 1 }); passm('Code Scanning API reachable'); }
-            catch { fail('Enable Code Scanning (Default setup)','https://docs.github.com/en/code-security/code-scanning/enabling-code-scanning'); }
+            catch { fail('Enable Code Scanning','https://docs.github.com/en/code-security/code-scanning/enabling-code-scanning'); }
 
             let depGraphStatus = 'unknown';
             try {
-              const repoInfo = await github.rest.repos.get({ owner, repo });
-              depGraphStatus = repoInfo.data?.security_and_analysis?.dependency_graph?.status || 'unknown';
+              const info = await github.rest.repos.get({ owner, repo });
+              depGraphStatus = info.data?.security_and_analysis?.dependency_graph?.status || 'unknown';
             } catch {}
             if (depGraphStatus !== 'enabled') fail('Enable Dependency graph in settings','https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph');
             else passm('Dependency graph enabled');
@@ -47,7 +47,7 @@ jobs:
             const failed = results.some(r => r.t === 'fail');
             let body = `# Veil — Security Baseline Gate (strict)\n\n| Status | Check |\n|---|---|\n`;
             for (const r of results) {
-              const icon = r.t === 'fail' ? '❌' : r.t === 'warn' ? '⚠️' : '✅';
+              const icon = r.t === 'fail' ? '❌' : '✅';
               const line = r.l ? `[${r.m}](${r.l})` : r.m;
               body += `| ${icon} | ${line} |\n`;
             }
