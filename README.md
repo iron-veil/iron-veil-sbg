@@ -1,37 +1,88 @@
-![Veil — Security Baseline Gate](https://github.com/iron-veil/iron-veil-sbg/actions/workflows/sbg.yml/badge.svg)
+![Veil - Security Baseline Gate](https://github.com/iron-veil/iron-veil-sbg/actions/workflows/sbg.yml/badge.svg)
 
-## Quick start (reusable)
-Create `.github/workflows/veil.yml` in your target repo:
+# Veil - Security Baseline Gate (SBG)
 
-name: Security Baseline Gate
-on: { pull_request: {}, push: { branches: ["**"] } }
-jobs:
-  veil:
-    uses: iron-veil/iron-veil-sbg/.github/workflows/reusable-sbg.yml@v0.0.1
+Security baseline checks for GitHub repositories. Veil verifies essential hardening features at pull-request time and posts clear, auditable results.
 
-# Veil — Security Baseline Gate (SBG)
+---
 
-Security Baseline Gate — checks for SECURITY.md, Dependabot, Code Scanning default setup visibility, Secret Scanning/Push Protection, Dependency Graph, and SBOM presence.
+## What Veil checks
 
-## Checks (MVP)
-- ❌ Fails if `SECURITY.md` is missing.
-- ❌ Fails if `.github/dependabot.yml` is missing.
-- ⚠️ Warns if Code Scanning (default setup) isn’t reachable via API.
-- ⚠️ Warns to enable Secret Scanning + Push Protection.
-- ✅/⚠️ Dependency Graph enabled.
-- ✅/⚠️ SBOM file detected (CycloneDX/SPDX) or hint to publish via Dependency Submission.
-  
-## Usage
-1. Copy `.github/workflows/sbg.yml` into your repository.
-2. Ensure `SECURITY.md` exists.
-3. Ensure `.github/dependabot.yml` exists (a minimal config is included).
-4. Open a pull request to trigger the check.
+- Fail if `SECURITY.md` is missing.
+- Fail if `.github/dependabot.yml` is missing.
+- Warn if Code Scanning (CodeQL) default setup is not reachable via API.
+- Warn if Secret Scanning and Push Protection are not enabled.
+- Pass/Warn based on Dependency Graph being enabled in repo settings.
+- Pass/Warn based on SBOM presence (CycloneDX or SPDX file in the repo, or guidance to publish via Dependency Submission).
 
-## Notes
-- Uses the repository `GITHUB_TOKEN` with read-only scopes.
-- No secrets are stored. No outbound calls beyond GitHub’s API.
+---
 
-## Permissions & privacy
-Uses the default `GITHUB_TOKEN` with `contents:read`, `security-events:read`, and `pull-requests:write` (for a sticky PR comment). No secrets are stored; no outbound calls beyond GitHub’s API.
+## Quick start (reusable workflow)
 
-- Docs: [Partner pitch](docs/PARTNER-PITCH.md) • [Security features](docs/SECURITY_FEATURES.md)
+Use Veil in any repository via a reusable workflow.
+
+Create `.github/workflows/veil.yml` in the target repo with:
+
+    name: Security Baseline Gate
+    on:
+      pull_request:
+      push:
+        branches: ["**"]
+    jobs:
+      veil:
+        uses: iron-veil/iron-veil-sbg/.github/workflows/reusable-sbg.yml@v0.0.1
+
+If you have not published a release tag yet, use `@main` temporarily and switch to the latest tag later.
+
+---
+
+## Using inside this repository
+
+Veil runs on both `push` and `pull_request` and can be triggered manually from the **Actions** tab. Results appear in:
+- the run summary (Checks tab), and
+- a sticky PR comment that updates on re-runs.
+
+---
+
+## Enable these GitHub features (recommended)
+
+- Code Scanning (CodeQL): Security → Code scanning alerts → Default setup → Enable  
+- Secret Scanning and Push Protection: Settings → Code security & analysis → Enable  
+- Dependency Graph: Settings → Code security & analysis → Enable
+
+---
+
+## SBOM options
+
+- Commit a CycloneDX or SPDX file to the repository (for example: `sbom.json`, `bom.xml`, `sbom.spdx.json`).  
+- Or publish dependencies via the Dependency Submission API during builds.
+
+---
+
+## Permissions and privacy
+
+Veil uses the repository `GITHUB_TOKEN` with:
+- `contents: read`
+- `security-events: read`
+- `pull-requests: write` (for the sticky PR comment)
+
+No secrets are stored. No outbound network calls beyond the GitHub API.
+
+---
+
+## Project docs
+
+- Partner overview: `docs/PARTNER-PITCH.md`  
+- Security features referenced: `docs/SECURITY_FEATURES.md`
+
+---
+
+## Support
+
+See `SUPPORT.md`. Security issues should be reported via private Security Advisories (see `SECURITY.md`).
+
+---
+
+## License
+
+[MIT](LICENSE)
