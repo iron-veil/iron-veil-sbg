@@ -1,5 +1,14 @@
 ![Veil — Security Baseline Gate](https://github.com/iron-veil/iron-veil-sbg/actions/workflows/sbg.yml/badge.svg)
 
+## Quick start (reusable workflow)
+Create `.github/workflows/veil.yml` in your target repo:
+
+name: Security Baseline Gate
+on: { pull_request: {}, push: { branches: ["**"] } }
+jobs:
+  veil:
+    uses: iron-veil/iron-veil-sbg/.github/workflows/reusable-sbg.yml@v0.0.1
+
 # Veil — Security Baseline Gate (SBG)
 
 Veil checks pull requests for baseline GitHub security posture.
