@@ -1,0 +1,20 @@
+name: Bug report
+description: Report a problem with Veil SBG
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Describe the behavior and the expected result.
+    validations:
+      required: true
+  - type: input
+    id: repo
+    attributes:
+      label: Affected repository
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste relevant run logs (Checks → Veil) or screenshots.

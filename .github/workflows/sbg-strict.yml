@@ -1,0 +1,66 @@
+name: Veil — Security Baseline Gate (strict)
+on:
+  pull_request:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: read
+  pull-requests: write
+
+jobs:
+  sbg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const results = [];
+            const fail = (m, l) => results.push({ t: 'fail', m, l });
+            const warn = (m, l) => results.push({ t: 'warn', m, l });
+            const passm = (m) => results.push({ t: 'pass', m });
+
+            let hasSec = false;
+            for (const p of ['SECURITY.md', '.github/SECURITY.md']) {
+              try { await github.rest.repos.getContent({ owner, repo, path: p }); hasSec = true; break; } catch {}
+            }
+            if (!hasSec) fail('Missing SECURITY.md','https://docs.github.com/en/code-security/getting-started/adding-a-security-policy-to-your-repository');
+
+            try { await github.rest.repos.getContent({ owner, repo, path: '.github/dependabot.yml' }); }
+            catch { fail('Missing .github/dependabot.yml','https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference'); }
+
+            try { await github.rest.codeScanning.listAlertsForRepo({ owner, repo, per_page: 1 }); passm('Code Scanning API reachable'); }
+            catch { fail('Enable Code Scanning (Default setup)','https://docs.github.com/en/code-security/code-scanning/enabling-code-scanning'); }
+
+            let depGraphStatus = 'unknown';
+            try {
+              const repoInfo = await github.rest.repos.get({ owner, repo });
+              depGraphStatus = repoInfo.data?.security_and_analysis?.dependency_graph?.status || 'unknown';
+            } catch {}
+            if (depGraphStatus !== 'enabled') fail('Enable Dependency graph in settings','https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-the-dependency-graph');
+            else passm('Dependency graph enabled');
+
+            const failed = results.some(r => r.t === 'fail');
+            let body = `# Veil — Security Baseline Gate (strict)\n\n| Status | Check |\n|---|---|\n`;
+            for (const r of results) {
+              const icon = r.t === 'fail' ? '❌' : r.t === 'warn' ? '⚠️' : '✅';
+              const line = r.l ? `[${r.m}](${r.l})` : r.m;
+              body += `| ${icon} | ${line} |\n`;
+            }
+            await core.summary.addRaw(body).write();
+
+            if (context.payload.pull_request) {
+              const issue_number = context.payload.pull_request.number;
+              const marker = '<!-- veil-sbg-strict -->';
+              const commentBody = `${marker}\n${body}\n`;
+              const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
+              const prior = comments.data.find(c => c.body && c.body.includes(marker));
+              if (prior) await github.rest.issues.updateComment({ owner, repo, comment_id: prior.id, body: commentBody });
+              else await github.rest.issues.createComment({ owner, repo, issue_number, body: commentBody });
+            }
+
+            if (failed) core.setFailed('Veil strict baseline checks failed.');

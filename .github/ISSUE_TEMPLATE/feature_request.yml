@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement for Veil SBG
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Problem to solve
+      description: What use case is missing?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the behavior, signals, or policies you want added.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: Fits the “baseline security checks” goal
+        - label: Doesn’t require secrets or external calls
