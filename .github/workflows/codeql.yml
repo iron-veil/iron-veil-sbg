@@ -25,16 +25,21 @@ jobs:
       contents: read
       actions: read
       packages: read
+
     strategy:
       fail-fast: false
       matrix:
         include:
           - language: actions
             build-mode: none
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+
       - uses: github/codeql-action/analyze@v3
