@@ -1,41 +1,33 @@
 name: OpenSSF Scorecard
 
 on:
-  schedule: [{ cron: "0 9 * * 1" }]  
+  schedule: [{ cron: "0 9 * * 1" }]   # Mondays 09:00 UTC
   push: { branches: ["main"] }
   workflow_dispatch:
 
 permissions:
   contents: read
-  security-events: write   
-  id-token: write          
+  security-events: write
+  id-token: write
   actions: read
 
 jobs:
   scorecard:
     runs-on: ubuntu-latest
     steps:
-      - name: Harden runner (egress lock)
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
+      - uses: step-security/harden-runner@v2
+        with: { egress-policy: audit }
 
       - uses: actions/checkout@v4
 
       - name: Run Scorecard
         uses: ossf/scorecard-action@v2.4.0
         with:
-          results_file: scorecard-results.sarif
+          results_file: scorecard.sarif
           results_format: sarif
-          publish_results: true 
+          publish_results: true  
 
-      - name: Upload SARIF to Code Scanning
+      - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: scorecard-results.sarif
-
-      - name: Upload raw artifacts (optional)
-        uses: actions/upload-artifact@v4
-        with:
-          name: scorecard-results
-          path: scorecard-results.sarif
+          sarif_file: scorecard.sarif
