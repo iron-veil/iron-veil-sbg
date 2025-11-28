@@ -1,0 +1,17 @@
+name: "Veil CodeQL Config"
+
+queries:
+  - uses: security-extended
+
+packs:
+  javascript: [codeql/javascript-queries]
+  java: [codeql/java-queries]
+
+paths:
+  - src
+  - server
+paths-ignore:
+  - dist
+  - build
+  - "**/*.test.*"
+  - "**/mocks/**"
