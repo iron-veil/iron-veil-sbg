@@ -1,33 +1,37 @@
-name: OpenSSF Scorecard
+name: Code Scanning (Advanced CodeQL)
 
 on:
-  schedule: [{ cron: "0 9 * * 1" }]   # Mondays 09:00 UTC
   push: { branches: ["main"] }
+  pull_request: { branches: ["main"] }
+  schedule: [ { cron: "0 8 * * 1" } ]
   workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
-  id-token: write
   actions: read
+  id-token: write
 
 jobs:
-  scorecard:
+  codeql:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: step-security/harden-runner@v2
         with: { egress-policy: audit }
 
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      - name: Run Scorecard
-        uses: ossf/scorecard-action@v2.4.0
+      - name: Init CodeQL
+        uses: github/codeql-action/init@v3
         with:
-          results_file: scorecard.sarif
-          results_format: sarif
-          publish_results: true  
+          config-file: .github/codeql/veil-codeql-config.yml
 
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
         with:
-          sarif_file: scorecard.sarif
+          category: "/codeql"
