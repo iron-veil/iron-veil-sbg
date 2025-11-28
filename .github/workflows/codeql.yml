@@ -1,7 +1,7 @@
 name: Code Scanning (Advanced CodeQL)
 
 on:
-  push:    { branches: ["main"] }
+  push: { branches: ["main"] }
   pull_request: { branches: ["main"] }
   schedule: [ { cron: "0 8 * * 1" } ]
   workflow_dispatch:
@@ -23,21 +23,13 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
 
-      - name: Init CodeQL (auto-detect languages)
+      - name: Init CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: auto
           config-file: .github/codeql/veil-codeql-config.yml
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
-
-      # If autobuild can't detect your build, add explicit build commands here.
-      # - run: |
-      #     ./gradlew build || true
-      #     # mvn -q -DskipTests package || true
-      #     # dotnet build --configuration Release || true
-      #     # make || true
 
       - name: Analyze
         uses: github/codeql-action/analyze@v3
