@@ -1,45 +1,56 @@
-name: CodeQL Advanced
+name: Code Scanning (Advanced CodeQL)
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
   schedule:
-    - cron: "35 8 * * 0"
+    - cron: "0 8 * * 1" 
 
 permissions:
-  security-events: write
   contents: read
-
-concurrency:
-  group: codeql-${{ github.ref }}
-  cancel-in-progress: true
+  security-events: write
+  actions: read
+  id-token: write
 
 jobs:
-  analyze:
+  codeql:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-      actions: read
-      packages: read
-
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - language: actions
-            build-mode: none
+        language: [ "javascript", "python", "cpp", "csharp", "java", "ruby", "go", "rust" ]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Harden runner (egress audit)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
 
-      - uses: github/codeql-action/init@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node cache
+        if: matrix.language == 'javascript'
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json','**/pnpm-lock.yaml','**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-npm-
+
+      - name: Init CodeQL
+        uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
-          queries: security-extended
+          config-file: .github/codeql/codeql-config.yml
 
-      - uses: github/codeql-action/analyze@v3
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
