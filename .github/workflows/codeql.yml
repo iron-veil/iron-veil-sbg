@@ -6,7 +6,8 @@ on:
   pull_request:
     branches: [ "main" ]
   schedule:
-    - cron: "0 8 * * 1" 
+    - cron: "0 8 * * 1"   # Mondays 08:00 UTC
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,41 +17,40 @@ permissions:
 
 jobs:
   codeql:
-    name: Analyze (${{ matrix.language }})
+    name: Analyze
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ "javascript", "python", "cpp", "csharp", "java", "ruby", "go", "rust" ]
-
+    timeout-minutes: 60
     steps:
       - name: Harden runner (egress audit)
         uses: step-security/harden-runner@v2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node cache
-        if: matrix.language == 'javascript'
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json','**/pnpm-lock.yaml','**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-npm-
-
+      # Let CodeQL auto-detect repo languages.
       - name: Init CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: ${{ matrix.language }}
+          languages: auto
           config-file: .github/codeql/veil-codeql-config.yml
 
+      # Try to build compiled languages automatically.
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
+
+      # If autobuild can’t detect your build, uncomment and add commands:
+      # - name: Manual build
+      #   run: |
+      #     ./gradlew build || true
+      #     # mvn -q -DskipTests package || true
+      #     # dotnet build --configuration Release || true
+      #     # make || true
 
       - name: Analyze
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{ matrix.language }}"
+          category: "/codeql"
