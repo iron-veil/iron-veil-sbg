@@ -1,26 +1,64 @@
 version: 2
+
 updates:
+  # --- GitHub Actions (workflows under .github/workflows) ---
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "main"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Phoenix"
     open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "github-actions"
+    commit-message:
+      prefix: "deps(actions)"
+      include: "scope"
+    labels: ["dependencies", "github-actions"]
+    groups:
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      actions-major:
+        patterns: ["*"]
+        update-types: ["major"]
+
   - package-ecosystem: "npm"
     directory: "/"
+    target-branch: "main"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "09:15"
+      timezone: "America/Phoenix"
     open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "npm"
+    versioning-strategy: "increase"
+    commit-message:
+      prefix: "deps(npm)"
+      include: "scope"
+    labels: ["dependencies", "npm"]
+
+    groups:
+      npm-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      npm-major:
+        patterns: ["*"]
+        update-types: ["major"]
+
   - package-ecosystem: "docker"
     directory: "/"
+    target-branch: "main"
     schedule:
       interval: "monthly"
+      day: "monday"
+      time: "09:30"
+      timezone: "America/Phoenix"
     open-pull-requests-limit: 2
-    labels:
-      - "dependencies"
-      - "docker"
+    commit-message:
+      prefix: "deps(docker)"
+      include: "scope"
+    labels: ["dependencies", "docker"]
+    groups:
+      docker-all:
+        patterns: ["*"]
