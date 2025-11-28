@@ -1,17 +1,22 @@
 name: "Veil CodeQL Config"
 
+# Start with security-extended to reduce noise but catch more than default.
 queries:
   - uses: security-extended
+#  - uses: security-and-quality  # optional, more findings/noise
 
-packs:
-  javascript: [codeql/javascript-queries]
-  java: [codeql/java-queries]
+# Keep paths open at first so you don't accidentally exclude everything.
+# Once a run is green, add accurate filters (examples below).
+# paths:
+#   - src
+#   - server
+# paths-ignore:
+#   - dist
+#   - build
+#   - "**/*.test.*"
+#   - "**/mocks/**"
 
-paths:
-  - src
-  - server
-paths-ignore:
-  - dist
-  - build
-  - "**/*.test.*"
-  - "**/mocks/**"
+# Example packs if you want to extend per-language later:
+# packs:
+#   javascript: [codeql/javascript-queries]
+#   java: [codeql/java-queries]
